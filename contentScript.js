@@ -1,6 +1,6 @@
-console.log('highlight-active-row: Injecting rowHighlighter...');
+console.log('table-row-locker: Injecting tableRowLocker...');
 var s = document.createElement('script');
-s.src = chrome.runtime.getURL('rowHighlighter.js');
+s.src = chrome.runtime.getURL('tableRowLocker.js');
 s.onload = function() {
   this.remove();
 };

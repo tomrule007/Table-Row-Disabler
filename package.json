@@ -1,8 +1,8 @@
 {
-  "name": "highlight-active-row",
+  "name": "table-row-locker",
   "version": "1.0.0",
-  "description": "chrome extension to make a selected table row more visible.",
-  "main": "index.js",
+  "description": "Chrome Extension that allows user to lock table rows to prevent data entry.",
+  "main": "contentScript.js",
   "author": "Thomas Herzog",
   "license": "MIT",
   "private": true

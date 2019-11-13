@@ -1,8 +1,8 @@
 {
-  "name": "Highlight Active Row",
-  "version": "1.1.0",
-  "description": "Makes the currently selected table row more visible.",
-  "web_accessible_resources": ["rowHighlighter.js"],
+  "name": "Table Row Locker",
+  "version": "1.0.0",
+  "description": "Chrome Extension that allows user to lock table rows to prevent data entry.",
+  "web_accessible_resources": ["tableRowLocker.js"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
