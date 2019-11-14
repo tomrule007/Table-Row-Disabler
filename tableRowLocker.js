@@ -11,20 +11,17 @@
   // Mutation Observer Example
   // Source: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
   // Select the node that will be observed for mutations
-  const targetNode = document.getElementById('unique-table-id');
+  const targetNode = document.getElementById('tbody');
 
   // Options for the observer (which mutations to observe)
-  const config = { attributes: true, childList: true, subtree: true };
+  const config = { attributes: false, childList: true, subtree: false };
 
   // Callback function to execute when mutations are observed
   const callback = function(mutationsList, observer) {
     for (let mutation of mutationsList) {
-      if (mutation.type === 'childList') {
-        console.log('A child node has been added or removed.');
-      } else if (mutation.type === 'attributes') {
-        console.log(
-          'The ' + mutation.attributeName + ' attribute was modified.'
-        );
+      if (mutation.addedNodes.length) {
+        console.log('A child node has been added');
+        console.log('the added node is: ', mutation.addedNodes);
       }
     }
   };
