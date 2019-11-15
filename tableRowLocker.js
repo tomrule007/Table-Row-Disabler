@@ -39,9 +39,19 @@
   // Start observing the target node for configured mutations
   observer.observe(targetNode, config);
 
+  function getUniqueRowIdentifier(row) {
+    /* Currently hard coding this to the value of the first TD
+    TODO: In future versions I would like the user to be able to set the column
+          or columns of interest to identify a row for more flexible use cases. 
+  */
+
+    return row.firstChild.innerHTML;
+  }
+
   function addCheckBox(row) {
     console.log('table-row-locker: Adding lock checkbox to row!');
     var div = document.createElement('div');
+    div.dataset.rowId = getUniqueRowIdentifier(row);
     div.innerHTML = '<input type="checkbox" class="rowDisablerCheckBox">';
     row.prepend(div);
   }
