@@ -39,7 +39,7 @@ function clearTableAndResetCount() {
 function addRow(label) {
   console.log('addRow!');
   var row = document.createElement('tr');
-  row.innerHTML = `<td>${label}</td><td> Blah Blah Blah </td> <td><input type="text"></td>`;
+  row.innerHTML = `<td>${label} Date, Medjool 24x1#</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="width: 15%;"></td><td style="width: 15%;"></td><td><textarea tabindex="-1" type="text" style="width: 100%; resize: vertical; padding: 3px; height: 24px;"></textarea></td><td><input pattern="[0-9]*" inputmode="numeric" value="" style="width: 50px;"></td>`;
 
   tbody.appendChild(row);
 }
