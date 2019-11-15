@@ -52,7 +52,7 @@
     console.log('table-row-locker: Adding lock checkbox to row!');
     var div = document.createElement('div');
     div.dataset.rowId = getUniqueRowIdentifier(row);
-    div.innerHTML = '<input type="checkbox" class="rowDisablerCheckBox">';
+    div.innerHTML = '🔓';
     row.prepend(div);
   }
 
