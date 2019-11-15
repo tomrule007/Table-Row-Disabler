@@ -17,27 +17,33 @@
   const config = { attributes: false, childList: true, subtree: false };
 
   // Callback function to execute when mutations are observed
-  const callback = function(mutationsList, observer) {
+  const mutationCallback = function(mutationsList, observer) {
     for (let mutation of mutationsList) {
-      if (mutation.addedNodes.length) {
+      let newNodeCount = mutation.addedNodes.length;
+      if (newNodeCount) {
         console.log('A child node has been added');
-        console.log('the added node is: ', mutation.addedNodes);
+        for (let i = 0; i < newNodeCount; i++) {
+          let newNode = mutation.addedNodes[i];
+          if ((newNode.nodeName = 'TR')) {
+            console.log('table-row-locker: new table row detected!');
+            addCheckBox(newNode);
+          }
+        }
       }
     }
   };
 
   // Create an observer instance linked to the callback function
-  const observer = new MutationObserver(callback);
+  const observer = new MutationObserver(mutationCallback);
 
   // Start observing the target node for configured mutations
   observer.observe(targetNode, config);
 
   function addCheckBox(row) {
-    var td = document.createElement('td');
-    td.innerHTML = '<input type="checkbox" class="rowDisablerCheckBox">';
-
-    row.prepend(td);
-    console.log(row);
+    console.log('table-row-locker: Adding lock checkbox to row!');
+    var div = document.createElement('div');
+    div.innerHTML = '<input type="checkbox" class="rowDisablerCheckBox">';
+    row.prepend(div);
   }
 
   function disableRow({ target }) {
