@@ -48,11 +48,24 @@
     return row.firstChild.innerHTML;
   }
 
+  function rowLockerClickHandler(event) {
+    console.log('table-row-locker: Locker clicked!');
+    const lockerDiv = event.target;
+    const identifier = lockerDiv.dataset.rowId;
+    const isLocked = lockerDiv.dataset.isLocked === 'true';
+    // If isLocked then set to unlocked else set to locked
+    lockerDiv.innerHTML = isLocked ? '🔓Unlocked' : '🔒Locked';
+
+    // Update locked state.
+    lockerDiv.dataset.isLocked = !isLocked;
+  }
   function addCheckBox(row) {
     console.log('table-row-locker: Adding lock checkbox to row!');
     var div = document.createElement('div');
     div.dataset.rowId = getUniqueRowIdentifier(row);
-    div.innerHTML = '🔓';
+    div.dataset.isLocked = false; // TODO: change this to lookup previous state;
+    div.innerHTML = '🔓Unlocked';
+    div.addEventListener('click', rowLockerClickHandler);
     row.prepend(div);
   }
 
