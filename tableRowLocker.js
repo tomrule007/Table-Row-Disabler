@@ -1,4 +1,40 @@
 (function() {
+  var lockerStore = (function() {
+    /* currently using local store as an individual user solution. 
+    TODO: need to figure out were the saved state will live for sharing between multiple users 
+      1) backend database w/ auth accounts
+      2) config file that is manual loaded (ie emailed back and forth)
+      3) network shared config file that is auto loaded every time.
+        
+      (leaning to #3 as the cleanest answer with the least security implications)
+
+    TODO: Also need domain specific storage & possibly table ID specific as well
+  */
+
+    let storeKeyId = 'tableRowLockerStore';
+    let store = JSON.parse(localStorage.getItem(storeKeyId)) || {};
+    const setState = state =>
+      localStorage.setItem(storeKeyId, JSON.stringify(state));
+
+    return {
+      isRowLocked: rowId => {
+        console.log(store);
+        var storeLookup = store[rowId];
+        console.log(rowId, storeLookup);
+        return storeLookup || false;
+      },
+      setRow: (rowId, isLocked) => {
+        // Only store locked row keys and delete all unlocked row keys if state changed.
+        if (isLocked) {
+          store = { ...store, [rowId]: true };
+        } else if (store[rowId]) {
+          delete store[rowId];
+        }
+        setState(store);
+      }
+    };
+  })();
+
   console.log('table-row-locker: tableRowLocker Injected!');
   var tables = document.getElementsByTagName('table');
   console.log('tables.length: ', tables.length);
@@ -51,22 +87,25 @@
   function rowLockerClickHandler(event) {
     console.log('table-row-locker: Locker clicked!');
     const lockerDiv = event.target;
-    const identifier = lockerDiv.dataset.rowId;
+    const rowId = lockerDiv.dataset.rowId;
     const isLocked = lockerDiv.dataset.isLocked === 'true';
     // If isLocked then set to unlocked else set to locked
     lockerDiv.innerHTML = isLocked ? '🔓Unlocked' : '🔒Locked';
 
     // Update locked state.
     lockerDiv.dataset.isLocked = !isLocked;
+    lockerStore.setRow(rowId, !isLocked);
   }
   function addCheckBox(row) {
-    console.log('table-row-locker: Adding lock checkbox to row!');
-    var div = document.createElement('div');
-    div.dataset.rowId = getUniqueRowIdentifier(row);
-    div.dataset.isLocked = false; // TODO: change this to lookup previous state;
-    div.innerHTML = '🔓Unlocked';
-    div.addEventListener('click', rowLockerClickHandler);
-    row.prepend(div);
+    const td = document.createElement('td');
+    const rowId = getUniqueRowIdentifier(row);
+    const isLocked = lockerStore.isRowLocked(rowId);
+
+    td.dataset.rowId = rowId;
+    td.dataset.isLocked = isLocked;
+    td.innerHTML = isLocked ? '🔒Locked' : '🔓Unlocked';
+    td.addEventListener('click', rowLockerClickHandler);
+    row.prepend(td);
   }
 
   function disableRow({ target }) {
