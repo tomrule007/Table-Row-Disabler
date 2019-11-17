@@ -1,0 +1,6 @@
+span.tableRowLocker::before {
+  content: '🔓';
+}
+span.tableRowLocker.lock::before {
+  content: '🔒';
+}

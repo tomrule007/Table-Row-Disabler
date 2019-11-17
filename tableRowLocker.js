@@ -86,26 +86,36 @@
 
   function rowLockerClickHandler(event) {
     console.log('table-row-locker: Locker clicked!');
-    const lockerDiv = event.target;
-    const rowId = lockerDiv.dataset.rowId;
-    const isLocked = lockerDiv.dataset.isLocked === 'true';
-    // If isLocked then set to unlocked else set to locked
-    lockerDiv.innerHTML = isLocked ? '🔓Unlocked' : '🔒Locked';
+    // Get lockEl & rowId
+    const lockEl = event.target;
+    const rowId = lockEl.dataset.rowId;
+
+    // Toggle locked state
+    lockEl.classList.toggle('lock');
 
     // Update locked state.
-    lockerDiv.dataset.isLocked = !isLocked;
-    lockerStore.setRow(rowId, !isLocked);
+    lockerStore.setRow(rowId, !lockerStore.isRowLocked(rowId));
   }
-  function addCheckBox(row) {
-    const td = document.createElement('td');
-    const rowId = getUniqueRowIdentifier(row);
-    const isLocked = lockerStore.isRowLocked(rowId);
 
-    td.dataset.rowId = rowId;
-    td.dataset.isLocked = isLocked;
-    td.innerHTML = isLocked ? '🔒Locked' : '🔓Unlocked';
-    td.addEventListener('click', rowLockerClickHandler);
-    row.prepend(td);
+  function addCheckBox(row) {
+    // Create element & add event listener & set class
+    const lockEl = document.createElement('span');
+    lockEl.addEventListener('click', rowLockerClickHandler);
+    lockEl.classList.add('tableRowLocker');
+
+    // Get rowID and store in dataset
+    const rowId = getUniqueRowIdentifier(row);
+    lockEl.dataset.rowId = rowId;
+
+    // Sync element class with saved lock state
+    if (lockerStore.isRowLocked(rowId)) {
+      lockEl.classList.add('lock');
+    } else {
+      lockEl.classList.remove('lock');
+    }
+
+    // Attach element to Row
+    row.firstChild.prepend(lockEl);
   }
 
   function disableRow({ target }) {
