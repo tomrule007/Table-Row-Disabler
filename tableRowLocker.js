@@ -60,7 +60,7 @@
         console.log('A child node has been added');
         for (let i = 0; i < newNodeCount; i++) {
           let newNode = mutation.addedNodes[i];
-          if ((newNode.nodeName = 'TR')) {
+          if (newNode.nodeName === 'TR') {
             console.log('table-row-locker: new table row detected!');
             addCheckBox(newNode);
           }
@@ -83,18 +83,34 @@
 
     return row.firstChild.innerHTML;
   }
+  function disableAndClearAllInputs(node, disable) {
+    if (node.nodeName === 'INPUT' || node.nodeName === 'TEXTAREA') {
+      if (disable) node.value = '';
+      node.disabled = disable;
+    }
 
+    // Check for children nodes and recursively check them for inputs as well.
+    if (node.childNodes.length) {
+      [...node.childNodes].forEach(childNode =>
+        disableAndClearAllInputs(childNode, disable)
+      );
+    }
+  }
   function rowLockerClickHandler(event) {
     console.log('table-row-locker: Locker clicked!');
-    // Get lockEl & rowId
+    // Get lockEl & rowId & new isLocked State
     const lockEl = event.target;
     const rowId = lockEl.dataset.rowId;
-
+    const isLocked = !lockerStore.isRowLocked(rowId);
     // Toggle locked state
     lockEl.classList.toggle('lock');
 
+    // Toggle Input disabled state
+    const rowElement = lockEl.parentNode.parentNode;
+    disableAndClearAllInputs(rowElement, isLocked);
+
     // Update locked state.
-    lockerStore.setRow(rowId, !lockerStore.isRowLocked(rowId));
+    lockerStore.setRow(rowId, isLocked);
   }
 
   function addCheckBox(row) {
@@ -110,6 +126,7 @@
     // Sync element class with saved lock state
     if (lockerStore.isRowLocked(rowId)) {
       lockEl.classList.add('lock');
+      disableAndClearAllInputs(row, true);
     } else {
       lockEl.classList.remove('lock');
     }
