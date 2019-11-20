@@ -1,4 +1,10 @@
-loadTableRowLocker();
+// content.js
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.message === 'clicked_browser_action') {
+    console.log('table-row-locker: click received from background');
+    loadTableRowLocker();
+  }
+});
 
 function loadTableRowLocker() {
   console.log('table-row-locker: Loading...');
@@ -125,6 +131,11 @@ function loadTableRowLocker() {
   }
 
   function addLock(row) {
+    // Exit if row has lock.
+    if (row.dataset.tableRowLocker) return;
+    // Tag row to prevent multiple locks.
+    row.dataset.tableRowLocker = true;
+
     // Create element & add event listener & set class
     const lockEl = document.createElement('span');
     lockEl.addEventListener('click', rowLockerClickHandler);
