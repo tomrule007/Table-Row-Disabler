@@ -1,3 +1,11 @@
+// Find all 'tbody' elements
+const tbodyElements = document.getElementsByTagName('tbody');
+
+// Attach Mutation observer to each 'tbody' elements
+[...tbodyElements].forEach(tbody =>
+  getNewNodeDetector(tbody, 'TR', addCheckBox)
+);
+
 var lockerStore = (function() {
   /* currently using local store as an individual user solution. 
     TODO: need to figure out were the saved state will live for sharing between multiple users 
@@ -43,36 +51,41 @@ console.log('tablerows.length', tableRows.length);
 
 [...tableRows].forEach(row => addCheckBox(row));
 
-// Mutation Observer Example
-// Source: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-// Select the node that will be observed for mutations
-const targetNode = document.getElementById('tbody');
-
-// Options for the observer (which mutations to observe)
-const config = { attributes: false, childList: true, subtree: false };
-
-// Callback function to execute when mutations are observed
-const mutationCallback = function(mutationsList, observer) {
-  for (let mutation of mutationsList) {
-    let newNodeCount = mutation.addedNodes.length;
-    if (newNodeCount) {
-      console.log('A child node has been added');
-      for (let i = 0; i < newNodeCount; i++) {
-        let newNode = mutation.addedNodes[i];
-        if (newNode.nodeName === 'TR') {
-          console.log('table-row-locker: new table row detected!');
-          addCheckBox(newNode);
+function getNewNodeDetector(
+  elementToObserve,
+  NodeNameToDetect,
+  newNodeCallback
+) {
+  // Create an observer instance linked to the callback function
+  const observer = new MutationObserver(
+    // MutationObserver Callback
+    mutationsList => {
+      for (let mutation of mutationsList) {
+        let newNodeCount = mutation.addedNodes.length;
+        if (newNodeCount) {
+          for (let i = 0; i < newNodeCount; i++) {
+            let newNode = mutation.addedNodes[i];
+            if (newNode.nodeName === NodeNameToDetect) {
+              console.log(
+                `table-row-locker: New ${NodeNameToDetect} detected!`
+              );
+              newNodeCallback(newNode);
+            }
+          }
         }
       }
     }
-  }
-};
+  );
 
-// Create an observer instance linked to the callback function
-const observer = new MutationObserver(mutationCallback);
-
-// Start observing the target node for configured mutations
-observer.observe(targetNode, config);
+  // Start observing
+  observer.observe(elementToObserve, {
+    attributes: false,
+    childList: true,
+    subtree: false
+  });
+  console.log(`table-row-locker: Observing ${elementToObserve}`);
+  return observer;
+}
 
 function getUniqueRowIdentifier(row) {
   /* Currently hard coding this to the value of the first TD
