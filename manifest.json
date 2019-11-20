@@ -2,11 +2,10 @@
   "name": "Table Row Locker",
   "version": "1.0.0",
   "description": "Chrome Extension that allows user to lock table rows to prevent data entry.",
-  "web_accessible_resources": ["tableRowLocker.js"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["contentScript.js"],
+      "js": ["tableRowLocker.js"],
       "css": ["tableRowLocker.css"]
     }
   ],
