@@ -1,10 +1,18 @@
-// content.js
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.message === 'clicked_browser_action') {
-    console.log('table-row-locker: click received from background');
-    loadTableRowLocker();
+// Setup message listener to communicate with background script.
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+  const { type } = message;
+  switch (type) {
+    case 'domainName':
+      console.log(`Domain Name is: ${message.domainName}`);
+      loadTableRowLocker();
+      break;
+    default:
+      console.log(`table-row-locker: unknown message type: ${type}`);
   }
 });
+
+// Request domain name on page load then wait for response
+chrome.runtime.sendMessage({ type: 'sendDomainName' });
 
 function loadTableRowLocker() {
   console.log('table-row-locker: Loading...');
