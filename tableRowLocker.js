@@ -5,7 +5,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     case 'Activate':
       console.log(`table-row-locker: Activating!`);
       const { storageKey } = message;
-      loadTableRowLocker(storageKey);
+      chrome.storage.sync.get([storageKey], result => {
+        loadTableRowLocker(result[storageKey] || {}, storageKey);
+      });
+
       break;
     default:
       console.log(`table-row-locker: unknown message type: ${type}`);
@@ -15,22 +18,13 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 // Request Activation
 chrome.runtime.sendMessage({ type: 'requestActivation' });
 
-function loadTableRowLocker(storeKeyId) {
+function loadTableRowLocker(initialState, storageKeyId) {
   console.log('table-row-locker: Loading...');
   var lockerStore = (function() {
-    /* currently using local store as an individual user solution. 
-    TODO: need to figure out were the saved state will live for sharing between multiple users 
-      1) backend database w/ auth accounts
-      2) config file that is manual loaded (ie emailed back and forth)
-      3) network shared config file that is auto loaded every time.
-        
-      (leaning to #3 as the cleanest answer with the least security implications)
+    var store = initialState;
 
-    TODO: Also need domain specific storage & possibly table ID specific as well
-  */
-    let store = JSON.parse(localStorage.getItem(storeKeyId)) || {};
     const setState = state =>
-      localStorage.setItem(storeKeyId, JSON.stringify(state));
+      chrome.storage.sync.set({ [storageKeyId]: state });
 
     return {
       isRowLocked: rowId => store[rowId] || false,
