@@ -99,7 +99,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
           or columns of interest to identify a row for more flexible use cases. 
   */
 
-    return row.firstChild.innerHTML;
+    return row.cells[0].textContent;
   }
   function disableAndClearAllInputs(node, disable) {
     if (node.nodeName === 'INPUT' || node.nodeName === 'TEXTAREA') {
@@ -155,6 +155,6 @@ function loadTableRowLocker(initialState, storageKeyId) {
     }
 
     // Attach element to Row
-    row.firstChild.prepend(lockEl);
+    row.cells[0].prepend(lockEl);
   }
 }
