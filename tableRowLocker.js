@@ -2,19 +2,20 @@
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   const { type } = message;
   switch (type) {
-    case 'domainName':
-      console.log(`Domain Name is: ${message.domainName}`);
-      loadTableRowLocker();
+    case 'Activate':
+      console.log(`table-row-locker: Activating!`);
+      const { storageKey } = message;
+      loadTableRowLocker(storageKey);
       break;
     default:
       console.log(`table-row-locker: unknown message type: ${type}`);
   }
 });
 
-// Request domain name on page load then wait for response
-chrome.runtime.sendMessage({ type: 'sendDomainName' });
+// Request Activation
+chrome.runtime.sendMessage({ type: 'requestActivation' });
 
-function loadTableRowLocker() {
+function loadTableRowLocker(storeKeyId) {
   console.log('table-row-locker: Loading...');
   var lockerStore = (function() {
     /* currently using local store as an individual user solution. 
@@ -27,8 +28,6 @@ function loadTableRowLocker() {
 
     TODO: Also need domain specific storage & possibly table ID specific as well
   */
-
-    let storeKeyId = 'tableRowLockerStore';
     let store = JSON.parse(localStorage.getItem(storeKeyId)) || {};
     const setState = state =>
       localStorage.setItem(storeKeyId, JSON.stringify(state));
