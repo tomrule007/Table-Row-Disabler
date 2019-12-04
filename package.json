@@ -5,5 +5,10 @@
   "main": "contentScript.js",
   "author": "Thomas Herzog",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-extension-reloader": "^1.1.4"
+  }
 }
