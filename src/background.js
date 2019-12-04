@@ -18,7 +18,7 @@ Click to Enable!`
   });
   chrome.pageAction.setIcon({
     tabId: id,
-    path: 'tableRowLockerDisabledIcon16.png'
+    path: 'img/tableRowLockerDisabledIcon16.png'
   });
 };
 
@@ -28,7 +28,7 @@ const enableExtensionIcon = tab => {
   chrome.pageAction.setTitle({ tabId: id, title: `Table-Row-Locker v1.0.0` });
   chrome.pageAction.setIcon({
     tabId: id,
-    path: 'tableRowLockerIcon16.png'
+    path: 'img/tableRowLockerIcon16.png'
   });
 };
 chrome.pageAction.onClicked.addListener(tab => {

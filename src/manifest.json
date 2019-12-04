@@ -16,9 +16,9 @@
     }
   ],
   "icons": {
-    "16": "tableRowLockerIcon16.png",
-    "48": "tableRowLockerIcon48.png",
-    "128": "tableRowLockerIcon128.png"
+    "16": "img/tableRowLockerIcon16.png",
+    "48": "img/tableRowLockerIcon48.png",
+    "128": "img/tableRowLockerIcon128.png"
   },
 
   "manifest_version": 2
