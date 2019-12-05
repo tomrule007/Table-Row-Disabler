@@ -20,8 +20,8 @@ chrome.runtime.sendMessage({ type: 'requestActivation' });
 
 function loadTableRowLocker(initialState, storageKeyId) {
   console.log('table-row-locker: Loading...');
-  var lockerStore = (function() {
-    var store = initialState;
+  const lockerStore = (function() {
+    let store = initialState;
 
     const setState = state =>
       chrome.storage.sync.set({ [storageKeyId]: state });
@@ -67,11 +67,11 @@ function loadTableRowLocker(initialState, storageKeyId) {
     const observer = new MutationObserver(
       // MutationObserver Callback
       mutationsList => {
-        for (let mutation of mutationsList) {
-          let newNodeCount = mutation.addedNodes.length;
+        for (const mutation of mutationsList) {
+          const newNodeCount = mutation.addedNodes.length;
           if (newNodeCount) {
             for (let i = 0; i < newNodeCount; i++) {
-              let newNode = mutation.addedNodes[i];
+              const newNode = mutation.addedNodes[i];
               if (newNode.nodeName === NodeNameToDetect) {
                 console.log(
                   `table-row-locker: New ${NodeNameToDetect} detected!`
@@ -118,7 +118,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
     console.log('table-row-locker: row lock toggled!');
     // Get lockEl & rowId & new isLocked State
     const lockEl = event.target;
-    const rowId = lockEl.dataset.rowId;
+    const {rowId} = lockEl.dataset;
     const isLocked = !lockerStore.isRowLocked(rowId);
     // Toggle locked state
     lockEl.classList.toggle('lock');
