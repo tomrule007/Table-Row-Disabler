@@ -1,18 +1,12 @@
+const webpackProductionConfig = require('./webpack.config');
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const ExtensionReloader = require('webpack-extension-reloader');
 
 module.exports = {
+  ...webpackProductionConfig,
   mode: 'development', // The plugin is activated only if mode is set to development
   watch: true,
-  entry: {
-    background: './src/background.js',
-    tableRowLocker: './src/tableRowLocker.js'
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js'
-  },
   plugins: [
     new ExtensionReloader({
       manifest: path.resolve(__dirname, './src/manifest.json')
