@@ -21,13 +21,12 @@ module.exports = {
       {
         from: './src/manifest.json',
         transform(content) {
-          return JSON.stringify(
-            Object.assign({}, JSON.parse(content), {
-              // EVAL is required for hot reloading
-              content_security_policy:
-                "script-src 'self' 'unsafe-eval'; object-src 'self'"
-            })
-          );
+          return JSON.stringify({
+            ...JSON.parse(content),
+            // EVAL is required for hot reloading
+            content_security_policy:
+              "script-src 'self' 'unsafe-eval'; object-src 'self'"
+          });
         }
       },
       { from: './src/tableRowLocker.css' },
