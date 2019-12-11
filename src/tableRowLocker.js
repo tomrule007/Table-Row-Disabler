@@ -1,3 +1,4 @@
+import getNewNodeDetector from './utills/getNewNodeDetector';
 // Setup message listener to communicate with background script.
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   const { type } = message;
@@ -58,41 +59,6 @@ function loadTableRowLocker(initialState, storageKeyId) {
     });
   });
 
-  function getNewNodeDetector(
-    elementToObserve,
-    NodeNameToDetect,
-    newNodeCallback
-  ) {
-    // Create an observer instance linked to the callback function
-    const observer = new MutationObserver(
-      // MutationObserver Callback
-      mutationsList => {
-        for (const mutation of mutationsList) {
-          const newNodeCount = mutation.addedNodes.length;
-          if (newNodeCount) {
-            for (let i = 0; i < newNodeCount; i++) {
-              const newNode = mutation.addedNodes[i];
-              if (newNode.nodeName === NodeNameToDetect) {
-                console.log(
-                  `table-row-locker: New ${NodeNameToDetect} detected!`
-                );
-                newNodeCallback(newNode);
-              }
-            }
-          }
-        }
-      }
-    );
-
-    // Start observing
-    observer.observe(elementToObserve, {
-      attributes: false,
-      childList: true,
-      subtree: false
-    });
-    return observer;
-  }
-
   function getUniqueRowIdentifier(row) {
     /* Currently hard coding this to the value of the first TD
     TODO: In future versions I would like the user to be able to set the column
@@ -118,7 +84,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
     console.log('table-row-locker: row lock toggled!');
     // Get lockEl & rowId & new isLocked State
     const lockEl = event.target;
-    const {rowId} = lockEl.dataset;
+    const { rowId } = lockEl.dataset;
     const isLocked = !lockerStore.isRowLocked(rowId);
     // Toggle locked state
     lockEl.classList.toggle('lock');
