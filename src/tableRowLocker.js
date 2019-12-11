@@ -71,10 +71,8 @@ function loadTableRowLocker(initialState, storageKeyId) {
       disableAllInputs(childNode, disable)
     );
   }
-  function rowLockerClickHandler(event) {
+  function toggleLock(lockEl) {
     console.log('table-row-locker: row lock toggled!');
-    // Get lockEl & rowId & new isLocked State
-    const lockEl = event.target;
     const { rowId } = lockEl.dataset;
     const isLocked = !lockerStore.isRowLocked(rowId);
     // Toggle locked state
@@ -96,7 +94,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
 
     // Create element & add event listener & set class
     const lockEl = document.createElement('span');
-    lockEl.addEventListener('click', rowLockerClickHandler);
+    lockEl.addEventListener('click', () => toggleLock(lockEl));
     lockEl.classList.add('tableRowLocker');
 
     // Get rowID and store in dataset
@@ -111,6 +109,10 @@ function loadTableRowLocker(initialState, storageKeyId) {
       lockEl.classList.remove('lock');
     }
 
+    /* Currently hard coding lock element location to first TD
+    TODO: In future versions I would like the user to be able to set  which column
+    the lock is element is located in. 
+    */
     // Attach element to Row
     row.cells[0].prepend(lockEl);
   }
