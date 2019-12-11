@@ -50,7 +50,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
   [...tbodyElements].forEach(tbody => {
     // Attach Mutation observer
     console.log('table-row-locker: Attaching observer to:', tbody);
-    getNewNodeDetector(tbody, 'TR', addLock);
+    getNewNodeDetector('TR', addLock, tbody);
 
     // Add lock's to existing rows
     [...tbody.childNodes].forEach(childNode => {
