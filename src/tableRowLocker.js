@@ -1,4 +1,7 @@
 import getNewNodeDetector from './utills/getNewNodeDetector';
+
+let domObserverRef = null;
+
 // Setup message listener to communicate with background script.
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   const { type } = message;
@@ -41,23 +44,14 @@ function loadTableRowLocker(initialState, storageKeyId) {
     };
   })();
 
-  // Find all 'tbody' elements
-  const tbodyElements = document.getElementsByTagName('tbody');
-  console.log(
-    `table-row-locker: ${tbodyElements ? tbodyElements.length : 0} tbody found'`
-  );
+  // disconnect domObserverRef if it exists to allow garbage collection.
+  if (domObserverRef) domObserverRef.disconnect();
 
-  [...tbodyElements].forEach(tbody => {
-    // Attach Mutation observer
-    console.log('table-row-locker: Attaching observer to:', tbody);
-    getNewNodeDetector('TR', addLock, tbody);
+  // Create newNodeDetector and set global reference.
+  domObserverRef = getNewNodeDetector('TR', addLock, document.body);
 
-    // Add lock's to existing rows
-    [...tbody.childNodes].forEach(childNode => {
-      if (childNode.nodeName !== 'TR') return;
-      addLock(childNode);
-    });
-  });
+  // Add lock's to all existing rows
+  [...document.getElementsByTagName('tr')].forEach(addLock);
 
   function getUniqueRowIdentifier(row) {
     /* Currently hard coding this to the value of the first TD
@@ -67,18 +61,15 @@ function loadTableRowLocker(initialState, storageKeyId) {
 
     return row.cells[0].textContent;
   }
-  function disableAndClearAllInputs(node, disable) {
-    if (node.nodeName === 'INPUT' || node.nodeName === 'TEXTAREA') {
-      if (disable) node.value = '';
+  function disableAllInputs(node, disable) {
+    if (node.nodeName === 'INPUT' || node.nodeName === 'TEXTAREA')
+      // eslint-disable-next-line no-param-reassign
       node.disabled = disable;
-    }
 
-    // Check for children nodes and recursively check them for inputs as well.
-    if (node.childNodes.length) {
-      [...node.childNodes].forEach(childNode =>
-        disableAndClearAllInputs(childNode, disable)
-      );
-    }
+    // Recursively check all childNodes inputs.
+    [...node.childNodes].forEach(childNode =>
+      disableAllInputs(childNode, disable)
+    );
   }
   function rowLockerClickHandler(event) {
     console.log('table-row-locker: row lock toggled!');
@@ -91,7 +82,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
 
     // Toggle Input disabled state
     const rowElement = lockEl.parentNode.parentNode;
-    disableAndClearAllInputs(rowElement, isLocked);
+    disableAllInputs(rowElement, isLocked);
 
     // Update locked state.
     lockerStore.setRow(rowId, isLocked);
@@ -115,7 +106,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
     // Sync element class with saved lock state
     if (lockerStore.isRowLocked(rowId)) {
       lockEl.classList.add('lock');
-      disableAndClearAllInputs(row, true);
+      disableAllInputs(row, true);
     } else {
       lockEl.classList.remove('lock');
     }
