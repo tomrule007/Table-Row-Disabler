@@ -4,7 +4,11 @@ import { getStorageState, setStorageState } from './utills/extensionStore';
 console.log('table-row-locker: background script');
 
 // utility functions
-const urlToDomain = url => url.match(/^.*\/\/.+?\//)[0];
+const urlToDomain = url => {
+  const domain = url.match(/(^.*)\/\/.+?\//);
+  if (domain[1] === 'file:/') return 'file:///';
+  return domain[0];
+};
 
 chrome.contextMenus.create({
   id: 'enabledCheckbox',
