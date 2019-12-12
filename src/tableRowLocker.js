@@ -117,3 +117,18 @@ function loadTableRowLocker(initialState, storageKeyId) {
     row.cells[0].prepend(lockEl);
   }
 }
+
+// Storage event listener
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  // Only listen to 'sync' namespace changes
+  if (namespace !== 'sync') return;
+  // hacky way to match the tab.url property which the background script reads
+  const domain = window.location.origin + '/';
+  Object.keys(changes).forEach(key => {
+    if (key === domain) {
+      // changes to this domain storage detected!
+      const { newValue, oldValue } = changes[key];
+      console.log({ newValue, oldValue });
+    }
+  });
+});
