@@ -1,4 +1,4 @@
-:disabled {
+tr :disabled {
   background-image: repeating-linear-gradient(
     -45deg,
     rgba(0, 0, 0, 0.2),
@@ -6,15 +6,18 @@
     rgba(255, 0, 0, 0.4) 7px,
     rgba(255, 0, 0, 0.4) 9px
   );
+  cursor: not-allowed;
 }
 
 span.tableRowLocker::before {
   content: '🔓';
   padding: 3px;
+  cursor: pointer;
 }
 span.tableRowLocker.lock::before {
   content: '🔒';
   padding: 3px;
   background-color: rgb(255, 0, 0, 0.4);
   border-radius: 50%;
+  cursor: pointer;
 }
