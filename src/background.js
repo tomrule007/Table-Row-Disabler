@@ -8,31 +8,39 @@ const sendActivateMsg = tab =>
     type: 'Activate',
     storageKey: urlToDomain(tab.url)
   });
-const disableExtensionIcon = tab => {
-  const { id } = tab;
-  chrome.pageAction.show(id);
-  chrome.pageAction.setTitle({
-    tabId: id,
+const disableExtension = tab => {
+  console.log('Setting Disabled Browser Action State');
+  const { id: tabId } = tab;
+  chrome.browserAction.enable(tabId);
+  chrome.browserAction.setTitle({
+    tabId,
     title: `Table-Row-Locker v1.0.0  
 Click to Enable!`
   });
-  chrome.pageAction.setIcon({
-    tabId: id,
+  chrome.browserAction.setIcon({
+    tabId,
     path: 'img/tableRowLockerDisabledIcon16.png'
   });
+  chrome.browserAction.setBadgeText({ text: '!', tabId });
+  chrome.browserAction.setBadgeBackgroundColor({ color: '#F00', tabId });
 };
 
-const enableExtensionIcon = tab => {
-  const { id } = tab;
-  chrome.pageAction.hide(id);
-  chrome.pageAction.setTitle({ tabId: id, title: `Table-Row-Locker v1.0.0` });
-  chrome.pageAction.setIcon({
-    tabId: id,
+const enableExtension = tab => {
+  console.log('Setting Enabled Browser Action State');
+  const { id: tabId } = tab;
+  chrome.browserAction.disable(tabId);
+  chrome.browserAction.setTitle({
+    tabId,
+    title: `Table-Row-Locker v1.0.0`
+  });
+  chrome.browserAction.setIcon({
+    tabId,
     path: 'img/tableRowLockerIcon16.png'
   });
+  chrome.browserAction.setBadgeText({ text: '', tabId });
 };
-chrome.pageAction.onClicked.addListener(tab => {
-  enableExtensionIcon(tab);
+chrome.browserAction.onClicked.addListener(tab => {
+  enableExtension(tab);
   sendActivateMsg(tab);
 });
 // Setup message listener to communicate with content scripts.
@@ -46,10 +54,11 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       chrome.storage.sync.get([storageKey], results => {
         if (results[storageKey]) {
           // Storage found! send activation message with storageKey
+          enableExtension(tab);
           sendActivateMsg(tab);
         } else {
-          // Storage not found disable and wait for pageAction click
-          disableExtensionIcon(tab);
+          // Storage not found disable and wait for browserAction click
+          disableExtension(tab);
         }
       });
 
