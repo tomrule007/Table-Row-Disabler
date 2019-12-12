@@ -129,6 +129,16 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       // changes to this domain storage detected!
       const { newValue, oldValue } = changes[key];
       console.log({ newValue, oldValue });
+
+      if (newValue && newValue.isEnabled) {
+        if (!oldValue || !oldValue.isEnabled)
+          console.log(`(${domain}) Initialize Script!`);
+        console.log(`(${domain}) ScanRows`);
+      } else if (oldValue && oldValue.isEnabled) {
+        console.log(`(${domain}) Teardown Script!`);
+      } else {
+        console.log(`(${domain}) Do Nothing!!`);
+      }
     }
   });
 });
