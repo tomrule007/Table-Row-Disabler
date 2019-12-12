@@ -2,26 +2,6 @@ import getNewNodeDetector from './utills/getNewNodeDetector';
 
 let domObserverRef = null;
 
-// Setup message listener to communicate with background script.
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-  const { type } = message;
-  switch (type) {
-    case 'Activate':
-      console.log(`table-row-locker: Activating!`);
-      const { storageKey } = message;
-      chrome.storage.sync.get([storageKey], result => {
-        loadTableRowLocker(result[storageKey] || {}, storageKey);
-      });
-
-      break;
-    default:
-      console.log(`table-row-locker: unknown message type: ${type}`);
-  }
-});
-
-// Request Activation
-chrome.runtime.sendMessage({ type: 'requestActivation' });
-
 function loadTableRowLocker(initialState, storageKeyId) {
   console.log('table-row-locker: Loading...');
   const lockerStore = (function() {
@@ -131,8 +111,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       console.log({ newValue, oldValue });
 
       if (newValue && newValue.isEnabled) {
-        if (!oldValue || !oldValue.isEnabled)
-          console.log(`(${domain}) Initialize Script!`);
+        if (!oldValue || !oldValue.isEnabled) {
+          console.log(`(${domain}) Initialize Script!: ${newValue}`);
+        }
+        loadTableRowLocker(newValue, domain);
         console.log(`(${domain}) ScanRows`);
       } else if (oldValue && oldValue.isEnabled) {
         console.log(`(${domain}) Teardown Script!`);
