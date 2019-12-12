@@ -1,4 +1,5 @@
 import { version } from '../package.json';
+import { getStorageState, setStorageState } from './utills/extensionStore';
 
 console.log('table-row-locker: background script');
 
@@ -55,11 +56,14 @@ const setBrowserActionView = (setEnabled, tab) => {
 };
 
 chrome.contextMenus.onClicked.addListener(({ checked }, tab) => {
+  const domain = urlToDomain(tab.url);
   if (checked) {
     setBrowserActionView(true, tab);
+    sendActivateMsg(tab);
   } else {
     setBrowserActionView(false, tab);
   }
+  setStorageState(domain, { isEnabled: checked });
 });
 const sendActivateMsg = tab =>
   chrome.tabs.sendMessage(tab.id, {
@@ -67,23 +71,29 @@ const sendActivateMsg = tab =>
     storageKey: urlToDomain(tab.url)
   });
 chrome.browserAction.onClicked.addListener(tab => {
+  const domain = urlToDomain(tab.url);
   setBrowserActionView(true, tab);
-  sendActivateMsg(tab);
+  setStorageState(domain, { isEnabled: true });
 });
 // Setup message listener to communicate with content scripts.
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   const { type } = message;
   const { url, tab } = sender;
+  const domain = urlToDomain(url);
+
   console.log(`Received ${type}`);
   switch (type) {
     case 'requestActivation':
-      const storageKey = urlToDomain(url);
-      chrome.storage.sync.get([storageKey], results => {
-        if (results[storageKey]) {
-          // Storage found! send activation message with storageKey
+      getStorageState(domain).then(results => {
+        const store = results[domain];
+        if (store) {
+          // Storage found! send activation message with domain
           setBrowserActionView(true, tab);
           sendActivateMsg(tab);
         } else {
+          // Store not found
+          setStorageState(domain, { isEnabled: false });
+
           // Storage not found disable and wait for browserAction click
           setBrowserActionView(false, tab);
         }
