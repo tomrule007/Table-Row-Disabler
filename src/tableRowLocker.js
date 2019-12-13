@@ -1,4 +1,5 @@
 import getNewNodeDetector from './utills/getNewNodeDetector';
+import { getStorageState } from './utills/extensionStore';
 
 let domObserverRef = null;
 
@@ -97,13 +98,22 @@ function loadTableRowLocker(initialState, storageKeyId) {
     row.cells[0].prepend(lockEl);
   }
 }
+const domain = window.location.origin + '/';
+
+// run on first load.
+getStorageState(domain).then(results => {
+  const store = results[domain];
+  console.log('Initial check of state', store);
+  if (store.isEnabled) {
+    loadTableRowLocker(store, domain);
+  }
+});
 
 // Storage event listener
 chrome.storage.onChanged.addListener((changes, namespace) => {
   // Only listen to 'sync' namespace changes
   if (namespace !== 'sync') return;
   // hacky way to match the tab.url property which the background script reads
-  const domain = window.location.origin + '/';
   Object.keys(changes).forEach(key => {
     if (key === domain) {
       // changes to this domain storage detected!
