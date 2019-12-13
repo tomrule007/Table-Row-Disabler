@@ -1,29 +1,29 @@
 {
-  "name": "Table Row Locker",
-  "version": "0.1.0",
-  "description": "Chrome Extension that allows user to lock table rows to prevent data entry.",
-  "permissions": ["storage", "activeTab", "contextMenus", "tabs"],
+  "name": "Table Row Disabler",
+  "version": "0.0.1",
+  "description": "Chrome extension that allows user to disable table rows to prevent data entry.",
+  "permissions": ["storage", "contextMenus", "tabs"],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
   },
   "browser_action": {
-    "default_title": "Table-Row-Locker v1.0.0\nClick to Enable!",
+    "default_title": "Table Row Disabler v0.0.1\nClick to Enable!",
     "default_icon": {
-      "16": "img/tableRowLockerDisabledIcon16.png"
+      "16": "img/TRD_Disabled_Icon16.png"
     }
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["tableRowLocker.js"],
-      "css": ["tableRowLocker.css"]
+      "js": ["tableRowDisabler.js"],
+      "css": ["tableRowDisabler.css"]
     }
   ],
   "icons": {
-    "16": "img/tableRowLockerIcon16.png",
-    "48": "img/tableRowLockerIcon48.png",
-    "128": "img/tableRowLockerIcon128.png"
+    "16": "img/TRD_Icon16.png",
+    "48": "img/TRD_Icon48.png",
+    "128": "img/TRD_Icon128.png"
   },
 
   "manifest_version": 2

@@ -1,7 +1,7 @@
 {
-  "name": "table-row-locker",
-  "version": "0.1.0",
-  "description": "Chrome Extension that allows user to lock table rows to prevent data entry.",
+  "name": "table-row-disabler",
+  "version": "0.0.1",
+  "description": "Chrome extension that allows user to disable table rows to prevent data entry.",
   "scripts": {
     "build": "webpack",
     "dev": "webpack --config webpack.config.dev.js"

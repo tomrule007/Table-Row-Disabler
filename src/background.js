@@ -55,9 +55,7 @@ const setBrowserActionView = (setEnabled, tab) => {
 
   setIcon({
     tabId,
-    path: setEnabled
-      ? 'img/tableRowLockerIcon16.png'
-      : 'img/tableRowLockerDisabledIcon16.png'
+    path: setEnabled ? 'img/TRD_Icon16.png' : 'img/TRD_Disabled_Icon16.png'
   });
 
   // Set Badge text & color
