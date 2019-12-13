@@ -1,5 +1,12 @@
-import { version } from '../package.json';
+import { name, version } from '../package.json';
 import { getStorageState, updateStorageState } from './utills/extensionStore';
+
+const formattedExtensionName = name
+  .split('-')
+  .map(([firstLetter, ...rest]) =>
+    firstLetter.toUpperCase().concat(rest.join(''))
+  )
+  .join(' ');
 
 // Makes tab.url === window.location.origin + '/' (which the content script relies on)
 const urlToDomain = url => {
@@ -41,7 +48,7 @@ const setBrowserActionView = (setEnabled, tab) => {
 
   setTitle({
     tabId,
-    title: `Table-Row-Locker v${version} ${
+    title: `${formattedExtensionName} v${version} ${
       setEnabled ? '' : '\nClick to Enable!'
     }`
   });
