@@ -23,7 +23,7 @@ module.exports = {
           });
         }
       },
-      { from: './src/tableRowLocker.css' },
+      { from: './src/tableRowDisabler.css' },
       { from: './src/img', to: 'img' }
     ])
   ]

@@ -5,7 +5,7 @@ module.exports = {
   mode: 'production',
   entry: {
     background: './src/background.js',
-    tableRowLocker: './src/tableRowLocker.js'
+    tableRowDisabler: './src/tableRowDisabler.js'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -14,7 +14,7 @@ module.exports = {
   plugins: [
     new CopyPlugin([
       { from: './src/manifest.json' },
-      { from: './src/tableRowLocker.css' },
+      { from: './src/tableRowDisabler.css' },
       { from: './src/img', to: 'img' }
     ])
   ]
