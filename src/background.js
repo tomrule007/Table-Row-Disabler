@@ -1,9 +1,7 @@
 import { version } from '../package.json';
-import { getStorageState, setStorageState } from './utills/extensionStore';
+import { getStorageState, updateStorageState } from './utills/extensionStore';
 
-console.log('table-row-locker: background script');
-
-// utility functions
+// Makes tab.url === window.location.origin + '/' (which the content script relies on)
 const urlToDomain = url => {
   const domain = url.match(/(^.*)\/\/.+?\//);
   if (domain[1] === 'file:/') return 'file:///';
@@ -17,6 +15,7 @@ chrome.contextMenus.create({
   type: 'checkbox',
   checked: false
 });
+
 const setBrowserActionView = (setEnabled, tab) => {
   const { id: tabId } = tab;
 
@@ -59,48 +58,49 @@ const setBrowserActionView = (setEnabled, tab) => {
   if (!setEnabled) setBadgeBackgroundColor({ color: '#F00', tabId });
 };
 
-chrome.contextMenus.onClicked.addListener(({ checked }, tab) => {
+const setExtensionOn = (setOn, tab) => {
   const domain = urlToDomain(tab.url);
-  if (checked) {
-    setBrowserActionView(true, tab);
-  } else {
-    setBrowserActionView(false, tab);
-  }
-  setStorageState(domain, { isEnabled: checked });
+  setBrowserActionView(setOn, tab);
+  updateStorageState(domain, { isEnabled: setOn });
+};
+
+const getStoreAndTriggerViewUpdate = tab => {
+  const domain = urlToDomain(tab.url);
+  getStorageState(domain).then(store => {
+    if (store[domain] && store[domain].isEnabled) {
+      setBrowserActionView(true, tab);
+    } else {
+      setBrowserActionView(false, tab);
+    }
+  });
+};
+
+// Initialize Current tabs
+chrome.tabs.query({ status: 'complete' }, tabs => {
+  tabs.forEach(getStoreAndTriggerViewUpdate);
 });
 
-chrome.browserAction.onClicked.addListener(tab => {
-  const domain = urlToDomain(tab.url);
-  setBrowserActionView(true, tab);
-  setStorageState(domain, { isEnabled: true });
+// Tab Change Listeners
+chrome.windows.onFocusChanged.addListener(windowId => {
+  if (windowId === -1) return;
+  chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) =>
+    getStoreAndTriggerViewUpdate(tab)
+  );
 });
-getStorageState(null).then(stores => {
-  chrome.tabs.query({ status: 'complete' }, tabs => {
-    tabs.forEach(tab => {
-      const domain = urlToDomain(tab.url);
-      if (stores[domain] && stores[domain].isEnabled) {
-        console.log('SET ENABLED', domain);
-        setBrowserActionView(true, tab);
-      } else {
-        console.log('SET DISABLED', domain);
-        setBrowserActionView(false, tab);
-      }
-    });
-  });
+
+chrome.tabs.onActivated.addListener(({ tabId }) => {
+  chrome.tabs.get(tabId, getStoreAndTriggerViewUpdate);
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changedInfo, tab) => {
-  if (changedInfo.status === 'complete') {
-    console.log('update complete');
-    const domain = urlToDomain(tab.url);
-    getStorageState(domain).then(store => {
-      if (store[domain] && store[domain].isEnabled) {
-        console.log('SET ENABLED', domain);
-        setBrowserActionView(true, tab);
-      } else {
-        console.log('SET DISABLED', domain);
-        setBrowserActionView(false, tab);
-      }
-    });
-  }
+  if (changedInfo.status !== 'complete') return;
+  getStoreAndTriggerViewUpdate(tab);
 });
+
+// Set Enabled on browser action click
+chrome.browserAction.onClicked.addListener(tab => setExtensionOn(true, tab));
+
+// Toggle Extension on/off on contextMenu click
+chrome.contextMenus.onClicked.addListener(({ checked }, tab) =>
+  setExtensionOn(checked, tab)
+);
