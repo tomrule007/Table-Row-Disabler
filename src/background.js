@@ -63,48 +63,44 @@ chrome.contextMenus.onClicked.addListener(({ checked }, tab) => {
   const domain = urlToDomain(tab.url);
   if (checked) {
     setBrowserActionView(true, tab);
-    sendActivateMsg(tab);
   } else {
     setBrowserActionView(false, tab);
   }
   setStorageState(domain, { isEnabled: checked });
 });
-const sendActivateMsg = tab =>
-  chrome.tabs.sendMessage(tab.id, {
-    type: 'Activate',
-    storageKey: urlToDomain(tab.url)
-  });
+
 chrome.browserAction.onClicked.addListener(tab => {
   const domain = urlToDomain(tab.url);
   setBrowserActionView(true, tab);
   setStorageState(domain, { isEnabled: true });
 });
-// Setup message listener to communicate with content scripts.
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-  const { type } = message;
-  const { url, tab } = sender;
-  const domain = urlToDomain(url);
+getStorageState(null).then(stores => {
+  chrome.tabs.query({ status: 'complete' }, tabs => {
+    tabs.forEach(tab => {
+      const domain = urlToDomain(tab.url);
+      if (stores[domain] && stores[domain].isEnabled) {
+        console.log('SET ENABLED', domain);
+        setBrowserActionView(true, tab);
+      } else {
+        console.log('SET DISABLED', domain);
+        setBrowserActionView(false, tab);
+      }
+    });
+  });
+});
 
-  console.log(`Received ${type}`);
-  switch (type) {
-    case 'requestActivation':
-      getStorageState(domain).then(results => {
-        const store = results[domain];
-        if (store) {
-          // Storage found! send activation message with domain
-          setBrowserActionView(true, tab);
-          sendActivateMsg(tab);
-        } else {
-          // Store not found
-          setStorageState(domain, { isEnabled: false });
-
-          // Storage not found disable and wait for browserAction click
-          setBrowserActionView(false, tab);
-        }
-      });
-
-      break;
-    default:
-      console.log(`table-row-locker: unknown message type: ${type}`);
+chrome.tabs.onUpdated.addListener((tabId, changedInfo, tab) => {
+  if (changedInfo.status === 'complete') {
+    console.log('update complete');
+    const domain = urlToDomain(tab.url);
+    getStorageState(domain).then(store => {
+      if (store[domain] && store[domain].isEnabled) {
+        console.log('SET ENABLED', domain);
+        setBrowserActionView(true, tab);
+      } else {
+        console.log('SET DISABLED', domain);
+        setBrowserActionView(false, tab);
+      }
+    });
   }
 });
