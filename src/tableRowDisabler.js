@@ -4,8 +4,7 @@ import { getStorageState } from './utills/extensionStore';
 let domObserverRef = null;
 
 function loadTableRowLocker(initialState, storageKeyId) {
-  console.log('table-row-locker: Loading...');
-  const lockerStore = (function() {
+  const lockerStore = (() => {
     let store = initialState;
 
     const setState = state =>
@@ -25,15 +24,6 @@ function loadTableRowLocker(initialState, storageKeyId) {
     };
   })();
 
-  // disconnect domObserverRef if it exists to allow garbage collection.
-  if (domObserverRef) domObserverRef.disconnect();
-
-  // Create newNodeDetector and set global reference.
-  domObserverRef = getNewNodeDetector('TR', addLock, document.body);
-
-  // Add lock's to all existing rows
-  [...document.getElementsByTagName('tr')].forEach(addLock);
-
   function getUniqueRowIdentifier(row) {
     /* Currently hard coding this to the value of the first TD
     TODO: In future versions I would like the user to be able to set the column
@@ -42,6 +32,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
 
     return row.cells[0].textContent;
   }
+
   function disableAllInputs(node, disable) {
     if (node.nodeName === 'INPUT' || node.nodeName === 'TEXTAREA')
       // eslint-disable-next-line no-param-reassign
@@ -52,8 +43,8 @@ function loadTableRowLocker(initialState, storageKeyId) {
       disableAllInputs(childNode, disable)
     );
   }
+
   function toggleLock(lockEl) {
-    console.log('table-row-locker: row lock toggled!');
     const { rowId } = lockEl.dataset;
     const isLocked = !lockerStore.isRowLocked(rowId);
     // Toggle locked state
@@ -71,6 +62,7 @@ function loadTableRowLocker(initialState, storageKeyId) {
     // Exit if row has lock.
     if (row.dataset.tableRowLocker) return;
     // Tag row to prevent multiple locks.
+    // eslint-disable-next-line no-param-reassign
     row.dataset.tableRowLocker = true;
 
     // Create element & add event listener & set class
@@ -97,13 +89,21 @@ function loadTableRowLocker(initialState, storageKeyId) {
     // Attach element to Row
     row.cells[0].prepend(lockEl);
   }
-}
-const domain = window.location.origin + '/';
 
+  // disconnect domObserverRef if it exists to allow garbage collection.
+  if (domObserverRef) domObserverRef.disconnect();
+
+  // Create newNodeDetector and set global reference.
+  domObserverRef = getNewNodeDetector('TR', addLock, document.body);
+
+  // Add lock's to all existing rows
+  [...document.getElementsByTagName('tr')].forEach(addLock);
+}
+
+const domain = `${window.location.origin}/`;
 // run on first load.
 getStorageState(domain).then(results => {
   const store = results[domain];
-  console.log('Initial check of state', store);
   if (store.isEnabled) {
     loadTableRowLocker(store, domain);
   }
@@ -113,23 +113,19 @@ getStorageState(domain).then(results => {
 chrome.storage.onChanged.addListener((changes, namespace) => {
   // Only listen to 'sync' namespace changes
   if (namespace !== 'sync') return;
-  // hacky way to match the tab.url property which the background script reads
   Object.keys(changes).forEach(key => {
     if (key === domain) {
       // changes to this domain storage detected!
       const { newValue, oldValue } = changes[key];
-      console.log({ newValue, oldValue });
 
       if (newValue && newValue.isEnabled) {
         if (!oldValue || !oldValue.isEnabled) {
-          console.log(`(${domain}) Initialize Script!: ${newValue}`);
+          // Initialize Script
         }
+        // Sync Row State with Storage State
         loadTableRowLocker(newValue, domain);
-        console.log(`(${domain}) ScanRows`);
       } else if (oldValue && oldValue.isEnabled) {
-        console.log(`(${domain}) Teardown Script!`);
-      } else {
-        console.log(`(${domain}) Do Nothing!!`);
+        // Teardown script (Remove all listeners, lockEl and disconnect mutation observer)
       }
     }
   });
