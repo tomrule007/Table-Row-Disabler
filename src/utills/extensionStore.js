@@ -1,28 +1,24 @@
-export function getStorageState(domain) {
+export function getStorageState(key) {
   return new Promise((resolve, reject) =>
-    chrome.storage.sync.get(domain, result => {
+    chrome.storage.sync.get(key, result => {
       if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
       resolve(result);
     })
   );
 }
 
-export function setStorageState(domain, state) {
+export function setStorageState(key, state) {
   return new Promise((resolve, reject) =>
-    chrome.storage.sync.set({ [domain]: state }, () => {
+    chrome.storage.sync.set({ [key]: state }, () => {
       if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
-      console.log('State Set', `${domain}: `, state);
       resolve();
     })
   );
 }
 
-// export async function updateStorageState(domain, data) {
-//     const previousState = await getStorageState(domain,);
-
-//   return new Promise(resolve =>
-//     chrome.storage.sync.set({ [storageKeyId]: state }, resolve());
-//     chrome.storage.sync.get(key, result => resolve(result))
-//   );
-// }
-export default { getStorageState, setStorageState };
+export async function updateStorageState(key, state) {
+  const previousState = (await getStorageState(key))[key];
+  const newState = { ...previousState, ...state };
+  return setStorageState(key, newState);
+}
+export default { getStorageState, setStorageState, updateStorageState };
